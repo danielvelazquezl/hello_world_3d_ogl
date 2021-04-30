@@ -112,7 +112,7 @@ static const char * const g_shaderFilesGl2[g_numShaders][2] = {
   {"./shaders/basic-gl2.vshader", "./shaders/diffuse-gl2.fshader"},
   {"./shaders/basic-gl2.vshader", "./shaders/solid-gl2.fshader"}
 };
-static vector<shared_ptr<ShaderState> > g_shaderStates; // our global shader states
+static vector<std::shared_ptr<ShaderState> > g_shaderStates; // our global shader states
 
 // --------- Geometry
 
@@ -182,7 +182,7 @@ struct Geometry {
 
 
 // Vertex buffer and index buffer associated with the ground and cube geometry
-static shared_ptr<Geometry> g_ground, g_cube;
+static std::shared_ptr<Geometry> g_ground, g_cube;
 
 // --------- Scene
 
