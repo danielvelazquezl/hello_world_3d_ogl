@@ -182,14 +182,21 @@ struct Geometry {
 
 
 // Vertex buffer and index buffer associated with the ground and cube geometry
-static std::shared_ptr<Geometry> g_ground, g_cube;
+static std::shared_ptr<Geometry> g_ground, g_cube_1, g_cube_2;
 
 // --------- Scene
 
 static const Cvec3 g_light1(2.0, 3.0, 14.0), g_light2(-2, -3.0, -5.0);  // define two lights positions in world space
-static Matrix4 g_skyRbt = Matrix4::makeTranslation(Cvec3(0.0, 0.25, 4.0));
-static Matrix4 g_objectRbt[1] = {Matrix4::makeTranslation(Cvec3(0,0,0))};  // currently only 1 obj is defined
-static Cvec3f g_objectColors[1] = {Cvec3f(1, 0, 0)};
+// static Matrix4 g_skyRbt = Matrix4::makeTranslation(Cvec3(0.0, 0.25, 4.0));
+static Matrix4 g_objectRbt[3] = {
+  Matrix4::makeTranslation(Cvec3(-1, 0, 0)), 
+  Matrix4::makeTranslation(Cvec3(1, 0, 0)),
+  Matrix4::makeTranslation(Cvec3(0.0, 0.25, 4.0))
+  };  // array of objects[cube_1, cube_2, sky]
+static Cvec3f g_objectColors[2] = {
+  Cvec3f(1.0, 1.0, 0.5), 
+  Cvec3f(0.7, 0.4, 1.0)
+  }; // colors for the objects [pastel yellow, lavender indigo]
 
 ///////////////// END OF G L O B A L S //////////////////////////////////////////////////
 
@@ -212,12 +219,19 @@ static void initCubes() {
   int ibLen, vbLen;
   getCubeVbIbLen(vbLen, ibLen);
 
-  // Temporary storage for cube geometry
-  vector<VertexPN> vtx(vbLen);
-  vector<unsigned short> idx(ibLen);
+  // Temporary storage for cube 1 geometry
+  vector<VertexPN> vtx_cube_1(vbLen);
+  vector<unsigned short> idx_cube_1(ibLen);
 
-  makeCube(1, vtx.begin(), idx.begin());
-  g_cube.reset(new Geometry(&vtx[0], &idx[0], vbLen, ibLen));
+  makeCube(1, vtx_cube_1.begin(), idx_cube_1.begin());
+  g_cube_1.reset(new Geometry(&vtx_cube_1[0], &idx_cube_1[0], vbLen, ibLen));
+
+  // storage for cube 2
+  vector<VertexPN> vtx_cube_2(vbLen);
+  vector<unsigned short> idx_cube_2(ibLen);
+
+  makeCube(1, vtx_cube_2.begin(), idx_cube_2.begin());
+  g_cube_2.reset(new Geometry(&vtx_cube_2[0], &idx_cube_2[0], vbLen, ibLen));
 }
 
 // takes a projection matrix and send to the the shaders
@@ -253,6 +267,8 @@ static Matrix4 makeProjectionMatrix() {
            g_frustNear, g_frustFar);
 }
 
+
+
 static void drawStuff() {
   // short hand for current shader state
   const ShaderState& curSS = *g_shaderStates[g_activeShader];
@@ -262,7 +278,8 @@ static void drawStuff() {
   sendProjectionMatrix(curSS, projmat);
 
   // use the skyRbt as the eyeRbt
-  const Matrix4 eyeRbt = g_skyRbt;
+  // const Matrix4 eyeRbt = g_skyRbt;
+  const Matrix4 eyeRbt = g_objectRbt[2];
   const Matrix4 invEyeRbt = inv(eyeRbt);
 
   const Cvec3 eyeLight1 = Cvec3(invEyeRbt * Cvec4(g_light1, 1)); // g_light1 position in eye coordinates
@@ -277,16 +294,23 @@ static void drawStuff() {
   Matrix4 MVM = invEyeRbt * groundRbt;
   Matrix4 NMVM = normalMatrix(MVM);
   sendModelViewNormalMatrix(curSS, MVM, NMVM);
-  safe_glUniform3f(curSS.h_uColor, 0.1, 0.95, 0.1); // set color
+  safe_glUniform3f(curSS.h_uColor, 0.0, 0.8, 0.6); // set ground color
   g_ground->draw(curSS);
 
   // draw cubes
-  // ==========
+  // cube 1
   MVM = invEyeRbt * g_objectRbt[0];
   NMVM = normalMatrix(MVM);
   sendModelViewNormalMatrix(curSS, MVM, NMVM);
   safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
-  g_cube->draw(curSS);
+  g_cube_1->draw(curSS); 
+  
+  // cube 2
+  MVM = invEyeRbt * g_objectRbt[1];
+  NMVM = normalMatrix(MVM);
+  sendModelViewNormalMatrix(curSS, MVM, NMVM);
+  safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+  g_cube_2->draw(curSS); 
 }
 
 static void display() {
@@ -294,7 +318,7 @@ static void display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);                   // clear framebuffer color&depth
 
   drawStuff();
-
+  
   glutSwapBuffers();                                    // show the back buffer (where we rendered stuff)
 
   checkGlErrors();
@@ -309,13 +333,18 @@ static void reshape(const int w, const int h) {
   glutPostRedisplay();
 }
 
+static int selectedObject = 0;
+static void toggleSelectedObject() {
+  selectedObject < 2 ? selectedObject++ : selectedObject = 0;
+}
+
 static void motion(const int x, const int y) {
   const double dx = x - g_mouseClickX;
   const double dy = g_windowHeight - y - 1 - g_mouseClickY;
 
   Matrix4 m;
   if (g_mouseLClickButton && !g_mouseRClickButton) { // left button down?
-    m = Matrix4::makeYRotation(dy) * Matrix4::makeXRotation(dx);
+    m = Matrix4::makeYRotation(dx) * Matrix4::makeXRotation(-dy);
   }
   else if (g_mouseRClickButton && !g_mouseLClickButton) { // right button down?
     m = Matrix4::makeTranslation(Cvec3(dx, dy, 0) * 0.01);
@@ -325,14 +354,13 @@ static void motion(const int x, const int y) {
   }
 
   if (g_mouseClickDown) {
-    g_objectRbt[0] *= m; // Simply right-multiply is WRONG
+    g_objectRbt[selectedObject] *= m; // Simply right-multiply is WRONG
     glutPostRedisplay(); // we always redraw if we changed the scene
   }
 
   g_mouseClickX = x;
   g_mouseClickY = g_windowHeight - y - 1;
 }
-
 
 static void mouse(const int button, const int state, const int x, const int y) {
   g_mouseClickX = x;
@@ -349,7 +377,6 @@ static void mouse(const int button, const int state, const int x, const int y) {
   g_mouseClickDown = g_mouseLClickButton || g_mouseRClickButton || g_mouseMClickButton;
 }
 
-
 static void keyboard(const unsigned char key, const int x, const int y) {
   switch (key) {
   case 27:
@@ -359,9 +386,7 @@ static void keyboard(const unsigned char key, const int x, const int y) {
     << "h\t\thelp menu\n"
     << "s\t\tsave screenshot\n"
     << "f\t\tToggle flat shading on/off.\n"
-    << "o\t\tCycle object to edit\n"
-    << "v\t\tCycle view\n"
-    << "drag left mouse to rotate\n" << endl;
+    << "o\t\tToggle object\n" << endl;
     break;
   case 's':
     glFlush();
@@ -369,6 +394,9 @@ static void keyboard(const unsigned char key, const int x, const int y) {
     break;
   case 'f':
     g_activeShader ^= 1;
+    break;
+  case 'o':
+    toggleSelectedObject();
     break;
   }
   glutPostRedisplay();
