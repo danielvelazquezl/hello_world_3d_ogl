@@ -18,7 +18,7 @@
 #ifdef __MAC__
 #   include <GLUT/glut.h>
 #else
-#   include <GL/glut.h>
+#   include <GL/freeglut.h>
 #endif
 
 #include "cvec.h"
