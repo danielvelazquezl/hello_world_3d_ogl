@@ -58,8 +58,8 @@ static const float g_frustFar = -50.0;    // far plane
 static const float g_groundY = -2.0;      // y coordinate of the ground
 static const float g_groundSize = 10.0;   // half the ground length
 
-static int g_windowWidth = 512;
-static int g_windowHeight = 512;
+static int g_windowWidth = 1280;
+static int g_windowHeight = 768;
 static bool g_mouseClickDown = false;    // is the mouse button pressed
 static bool g_mouseLClickButton, g_mouseRClickButton, g_mouseMClickButton;
 static int g_mouseClickX, g_mouseClickY; // coordinates for mouse click event
@@ -182,7 +182,7 @@ struct Geometry {
 
 
 // Vertex buffer and index buffer associated with the ground and cube geometry
-static std::shared_ptr<Geometry> g_ground, g_cube_1, g_cube_2;
+static std::shared_ptr<Geometry> g_ground, g_cube_1, g_cube_2, g_sphere_1, g_sphere_2;
 
 // --------- Scene
 
@@ -191,12 +191,12 @@ static const Cvec3 g_light1(2.0, 3.0, 14.0), g_light2(-2, -3.0, -5.0);  // defin
 static Matrix4 g_objectRbt[3] = {
   Matrix4::makeTranslation(Cvec3(-1, 0, 0)), 
   Matrix4::makeTranslation(Cvec3(1, 0, 0)),
-  Matrix4::makeTranslation(Cvec3(0.0, 0.25, 4.0))
+  Matrix4::makeTranslation(Cvec3(0.0, 0.25, 5.0))
   };  // array of objects[cube_1, cube_2, sky]
 static Cvec3f g_objectColors[2] = {
-  Cvec3f(1.0, 1.0, 0.5), 
-  Cvec3f(0.7, 0.4, 1.0)
-  }; // colors for the objects [pastel yellow, lavender indigo]
+  Cvec3f(0.2, 0.2, 1.0),
+  Cvec3f(1.0, 0.16, 0.0)
+  }; // colors for the objects
 
 ///////////////// END OF G L O B A L S //////////////////////////////////////////////////
 
@@ -232,6 +232,28 @@ static void initCubes() {
 
   makeCube(1, vtx_cube_2.begin(), idx_cube_2.begin());
   g_cube_2.reset(new Geometry(&vtx_cube_2[0], &idx_cube_2[0], vbLen, ibLen));
+}
+
+static void initSpheres() {
+  const int slices = 50;
+  const int stacks = 40;
+
+  int ibLen, vbLen;
+  getSphereVbIbLen(slices, stacks, vbLen, ibLen);
+
+  // sphere 1
+  vector<VertexPN> vtx_sphere_1(vbLen);
+  vector<unsigned short> idx_sphere_1(ibLen);
+
+  makeSphere(1, slices, stacks, vtx_sphere_1.begin(), idx_sphere_1.begin());
+  g_sphere.reset(new Geometry(&vtx_sphere_1[0], &idx_sphere_1[0], vbLen, ibLen));
+
+  // sphere 2
+  vector<VertexPN> vtx_sphere_2(vbLen);
+  vector<unsigned short> idx_sphere_2(ibLen);
+
+  makeSphere(1, slices, stacks, vtx_sphere_2.begin(), idx_sphere_2.begin());
+  g_sphere.reset(new Geometry(&vtx_sphere_2[0], &idx_sphere_2[0], vbLen, ibLen));
 }
 
 // takes a projection matrix and send to the the shaders
@@ -289,7 +311,6 @@ static void drawStuff() {
 
   // draw ground
   // ===========
-  //
   const Matrix4 groundRbt = Matrix4();  // identity
   Matrix4 MVM = invEyeRbt * groundRbt;
   Matrix4 NMVM = normalMatrix(MVM);
@@ -311,6 +332,9 @@ static void drawStuff() {
   sendModelViewNormalMatrix(curSS, MVM, NMVM);
   safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
   g_cube_2->draw(curSS); 
+
+  // sphere 1
+  
 }
 
 static void display() {
