@@ -188,11 +188,13 @@ static std::shared_ptr<Geometry> g_ground, g_cube_1, g_cube_2, g_sphere_1, g_sph
 
 static const Cvec3 g_light1(2.0, 3.0, 14.0), g_light2(-2, -3.0, -5.0);  // define two lights positions in world space
 // static Matrix4 g_skyRbt = Matrix4::makeTranslation(Cvec3(0.0, 0.25, 4.0));
-static Matrix4 g_objectRbt[3] = {
+static Matrix4 g_objectRbt[5] = {
   Matrix4::makeTranslation(Cvec3(-1, 0, 0)), 
   Matrix4::makeTranslation(Cvec3(1, 0, 0)),
-  Matrix4::makeTranslation(Cvec3(0.0, 0.25, 5.0))
-  };  // array of objects[cube_1, cube_2, sky]
+  Matrix4::makeTranslation(Cvec3(0.0, 0.25, 5.0)),
+  Matrix4::makeTranslation(Cvec3(-1, 0, -1)),
+  Matrix4::makeTranslation(Cvec3(1, 0, -1))
+  };  // array of objects[cube_1, cube_2, sky, sphere_1, sphere_2]
 static Cvec3f g_objectColors[2] = {
   Cvec3f(0.2, 0.2, 1.0),
   Cvec3f(1.0, 0.16, 0.0)
@@ -246,14 +248,14 @@ static void initSpheres() {
   vector<unsigned short> idx_sphere_1(ibLen);
 
   makeSphere(1, slices, stacks, vtx_sphere_1.begin(), idx_sphere_1.begin());
-  g_sphere.reset(new Geometry(&vtx_sphere_1[0], &idx_sphere_1[0], vbLen, ibLen));
+  g_sphere_1.reset(new Geometry(&vtx_sphere_1[0], &idx_sphere_1[0], vbLen, ibLen));
 
   // sphere 2
   vector<VertexPN> vtx_sphere_2(vbLen);
   vector<unsigned short> idx_sphere_2(ibLen);
 
   makeSphere(1, slices, stacks, vtx_sphere_2.begin(), idx_sphere_2.begin());
-  g_sphere.reset(new Geometry(&vtx_sphere_2[0], &idx_sphere_2[0], vbLen, ibLen));
+  g_sphere_2.reset(new Geometry(&vtx_sphere_2[0], &idx_sphere_2[0], vbLen, ibLen));
 }
 
 // takes a projection matrix and send to the the shaders
@@ -289,7 +291,15 @@ static Matrix4 makeProjectionMatrix() {
            g_frustNear, g_frustFar);
 }
 
-
+static bool switchObject = false;
+/**
+ * Switch between the cubes and spheres
+ * True: draw cubes
+ * False: draw spheres
+ **/
+static void toggleSpheres() {
+  switchObject ? switchObject = false : switchObject = true;
+}
 
 static void drawStuff() {
   // short hand for current shader state
@@ -318,23 +328,40 @@ static void drawStuff() {
   safe_glUniform3f(curSS.h_uColor, 0.0, 0.8, 0.6); // set ground color
   g_ground->draw(curSS);
 
-  // draw cubes
-  // cube 1
-  MVM = invEyeRbt * g_objectRbt[0];
-  NMVM = normalMatrix(MVM);
-  sendModelViewNormalMatrix(curSS, MVM, NMVM);
-  safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
-  g_cube_1->draw(curSS); 
-  
-  // cube 2
-  MVM = invEyeRbt * g_objectRbt[1];
-  NMVM = normalMatrix(MVM);
-  sendModelViewNormalMatrix(curSS, MVM, NMVM);
-  safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
-  g_cube_2->draw(curSS); 
-
-  // sphere 1
-  
+  // draw objects
+  if (!switchObject) {
+    // cube 1
+    MVM = invEyeRbt * g_objectRbt[0];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
+    g_cube_1->draw(curSS); 
+    
+    // cube 2
+    MVM = invEyeRbt * g_objectRbt[1];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+    g_cube_2->draw(curSS); 
+  } else {
+    // sphere 1
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    MVM = invEyeRbt * g_objectRbt[3];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
+    g_sphere_2->draw(curSS);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    
+    // sphere 2
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    MVM = invEyeRbt * g_objectRbt[4];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+    g_sphere_2->draw(curSS);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  }
 }
 
 static void display() {
@@ -368,7 +395,12 @@ static void motion(const int x, const int y) {
 
   Matrix4 m;
   if (g_mouseLClickButton && !g_mouseRClickButton) { // left button down?
-    m = Matrix4::makeYRotation(dx) * Matrix4::makeXRotation(-dy);
+    // when the sky is selected change the signs (x,y)
+    if (selectedObject == 2) {
+      m = Matrix4::makeYRotation(-dx) * Matrix4::makeXRotation(dy);
+    } else {
+      m = Matrix4::makeYRotation(dx) * Matrix4::makeXRotation(-dy);
+    }
   }
   else if (g_mouseRClickButton && !g_mouseLClickButton) { // right button down?
     m = Matrix4::makeTranslation(Cvec3(dx, dy, 0) * 0.01);
@@ -404,13 +436,14 @@ static void mouse(const int button, const int state, const int x, const int y) {
 static void keyboard(const unsigned char key, const int x, const int y) {
   switch (key) {
   case 27:
-    exit(0);                                  // ESC
+    exit(0); // ESC
   case 'h':
     cout << " ============== H E L P ==============\n\n"
     << "h\t\thelp menu\n"
     << "s\t\tsave screenshot\n"
     << "f\t\tToggle flat shading on/off.\n"
-    << "o\t\tToggle object\n" << endl;
+    << "o\t\tToggle object\n"
+    << "e\t\tShow spheres\n" << endl;
     break;
   case 's':
     glFlush();
@@ -421,6 +454,9 @@ static void keyboard(const unsigned char key, const int x, const int y) {
     break;
   case 'o':
     toggleSelectedObject();
+    break;
+  case 'e':
+    toggleSpheres();
     break;
   }
   glutPostRedisplay();
@@ -466,6 +502,7 @@ static void initShaders() {
 static void initGeometry() {
   initGround();
   initCubes();
+  initSpheres();
 }
 
 int main(int argc, char * argv[]) {
