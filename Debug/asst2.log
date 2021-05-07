@@ -1,0 +1,106 @@
+﻿cl : command line warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  ppm.cpp
+  glsupport.cpp
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\glsupport.cpp(33,14): warning C4244: 'initializing': conversion from 'std::streamoff' to 'size_t', possible loss of data
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\glsupport.cpp(58,36): warning C4838: conversion from 'unsigned int' to 'const GLint' requires a narrowing conversion
+  asst2.cpp
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(31,17): warning C4996: 'std::tr1': warning STL4002: The non-Standard std::tr1 namespace and TR1-only machinery are deprecated and will be REMOVED. You can define _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING to acknowledge that you have received this warning.
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(56,38): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(120,1): warning C4005: 'FIELD_OFFSET': macro redefinition
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\winnt.h(1205): message : see previous definition of 'FIELD_OFFSET'
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(199,23): warning C4305: 'argument': truncation from 'double' to 'const T'
+          with
+          [
+              T=float
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(200,24): warning C4305: 'argument': truncation from 'double' to 'const T'
+          with
+          [
+              T=float
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(284,126): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(319,75): warning C4244: 'argument': conversion from 'const T' to 'const GLfloat', possible loss of data
+          with
+          [
+              T=double
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(319,61): warning C4244: 'argument': conversion from 'const T' to 'const GLfloat', possible loss of data
+          with
+          [
+              T=double
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(319,47): warning C4244: 'argument': conversion from 'const T' to 'const GLfloat', possible loss of data
+          with
+          [
+              T=double
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(320,76): warning C4244: 'argument': conversion from 'const T' to 'const GLfloat', possible loss of data
+          with
+          [
+              T=double
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(320,62): warning C4244: 'argument': conversion from 'const T' to 'const GLfloat', possible loss of data
+          with
+          [
+              T=double
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(320,48): warning C4244: 'argument': conversion from 'const T' to 'const GLfloat', possible loss of data
+          with
+          [
+              T=double
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(328,49): warning C4305: 'argument': truncation from 'double' to 'const GLfloat'
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(479,51): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\geometrymaker.h(58,11): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(228): message : see reference to function template instantiation 'void makeCube<std::_Vector_iterator<std::_Vector_val<std::_Simple_types<_Ty>>>,std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned short>>>>(float,VtxOutIter,IdxOutIter)' being compiled
+          with
+          [
+              _Ty=VertexPN,
+              VtxOutIter=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<VertexPN>>>,
+              IdxOutIter=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned short>>>
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\geometrymaker.h(148,15): warning C4244: 'initializing': conversion from '_Ty' to 'float', possible loss of data
+          with
+          [
+              _Ty=double
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\asst2.cpp(250): message : see reference to function template instantiation 'void makeSphere<std::_Vector_iterator<std::_Vector_val<std::_Simple_types<_Ty>>>,std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned short>>>>(float,int,int,VtxOutIter,IdxOutIter)' being compiled
+          with
+          [
+              _Ty=VertexPN,
+              VtxOutIter=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<VertexPN>>>,
+              IdxOutIter=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned short>>>
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\geometrymaker.h(149,15): warning C4244: 'initializing': conversion from '_Ty' to 'float', possible loss of data
+          with
+          [
+              _Ty=double
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\geometrymaker.h(150,15): warning C4244: 'initializing': conversion from '_Ty' to 'float', possible loss of data
+          with
+          [
+              _Ty=double
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\geometrymaker.h(153,38): warning C4244: 'argument': conversion from '_Ty' to 'const T', possible loss of data
+          with
+          [
+              _Ty=double
+          ]
+          and
+          [
+              T=float
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\geometrymaker.h(153,16): warning C4244: 'argument': conversion from '_Ty' to 'const T', possible loss of data
+          with
+          [
+              _Ty=double
+          ]
+          and
+          [
+              T=float
+          ]
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\geometrymaker.h(159,33): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\geometrymaker.h(159,19): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  Generating Code...
+glsupport.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
+  asst2.vcxproj -> C:\Users\adrih\Documents\GitHub\hello_world_3d_ogl\Debug\asst2.exe

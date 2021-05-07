@@ -8,7 +8,7 @@
 #ifdef __MAC__
 # include <GLUT/glut.h>
 #else
-# include <GL/glut.h>
+# include <GL/freeglut.h>
 #endif
 
 // Check if there has been an error inside OpenGL and if yes, print the error and
