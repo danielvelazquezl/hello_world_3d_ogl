@@ -4,14 +4,15 @@
 ## How to run
 ### Linux
 ```
-make && ./ass2
+make && ./asst2
 ```
 ### Windows 
-```
-// Don't know yet
-```
+Open asst2.sln with Visual Studio and run the project
 
 ## Usage
-```
-// TODO
-```
+Press: 
+- h -> help menu
+- s -> save screenshot
+- f -> Toggle flat shading on/off.
+- o -> Toggle object focus (only cubes and camera)
+- e -> Show objects

@@ -684,9 +684,8 @@ static void keyboard(const unsigned char key, const int x, const int y) {
     << "h\t\thelp menu\n"
     << "s\t\tsave screenshot\n"
     << "f\t\tToggle flat shading on/off.\n"
-    << "o\t\tToggle object\n"
-    << "e\t\tShow spheres\n"
-    << "r\t\tShow robots\n" << endl;
+    << "o\t\tToggle object focus (only cubes and camera)\n"
+    << "e\t\tShow objects\n" << endl;
     break;
   case 's':
     glFlush();
