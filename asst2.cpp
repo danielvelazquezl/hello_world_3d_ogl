@@ -525,14 +525,15 @@ static Matrix4 makeProjectionMatrix() {
            g_frustNear, g_frustFar);
 }
 
-static bool switchObject = false;
+static int switchObjects = 0;
 /**
  * Switch between the cubes and spheres
- * True: draw cubes
- * False: draw spheres
+ * 1: draw cubes
+ * 2: draw spheres
+ * 3: draw robots
  **/
-static void toggleSpheres() {
-  switchObject ? switchObject = false : switchObject = true;
+static void toggleObjects() {
+  switchObjects < 2 ? switchObjects++ : switchObjects = 0;
 }
 
 static void drawStuff() {
@@ -563,41 +564,46 @@ static void drawStuff() {
   g_ground->draw(curSS);
 
   // draw objects
-  if (!switchObject) {
-    // cube 1
-    MVM = invEyeRbt * g_objectRbt[0];
-    NMVM = normalMatrix(MVM);
-    sendModelViewNormalMatrix(curSS, MVM, NMVM);
-    safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
-    g_cube_1->draw(curSS); 
-    
-    // cube 2
-    MVM = invEyeRbt * g_objectRbt[1];
-    NMVM = normalMatrix(MVM);
-    sendModelViewNormalMatrix(curSS, MVM, NMVM);
-    safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
-    g_cube_2->draw(curSS); 
-  } else {
-    // sphere 1
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    MVM = invEyeRbt * g_objectRbt[3];
-    NMVM = normalMatrix(MVM);
-    sendModelViewNormalMatrix(curSS, MVM, NMVM);
-    safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
-    g_sphere_2->draw(curSS);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    
-    // sphere 2
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    MVM = invEyeRbt * g_objectRbt[4];
-    NMVM = normalMatrix(MVM);
-    sendModelViewNormalMatrix(curSS, MVM, NMVM);
-    safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
-    g_sphere_2->draw(curSS);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  switch (switchObjects) {
+    case 0: 
+      // cube 1
+      MVM = invEyeRbt * g_objectRbt[0];
+      NMVM = normalMatrix(MVM);
+      sendModelViewNormalMatrix(curSS, MVM, NMVM);
+      safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
+      g_cube_1->draw(curSS); 
+      
+      // cube 2
+      MVM = invEyeRbt * g_objectRbt[1];
+      NMVM = normalMatrix(MVM);
+      sendModelViewNormalMatrix(curSS, MVM, NMVM);
+      safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+      g_cube_2->draw(curSS);
+      break; 
+    case 1:
+      // sphere 1
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      MVM = invEyeRbt * g_objectRbt[3];
+      NMVM = normalMatrix(MVM);
+      sendModelViewNormalMatrix(curSS, MVM, NMVM);
+      safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
+      g_sphere_2->draw(curSS);
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      
+      // sphere 2
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      MVM = invEyeRbt * g_objectRbt[4];
+      NMVM = normalMatrix(MVM);
+      sendModelViewNormalMatrix(curSS, MVM, NMVM);
+      safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+      g_sphere_2->draw(curSS);
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      break;
+    case 2:
+      robot_1.drawRobot(curSS, invEyeRbt);
+      robot_2.drawRobot(curSS, invEyeRbt);
+      break;
   }
-  robot_1.drawRobot(curSS, invEyeRbt);
-  robot_2.drawRobot(curSS, invEyeRbt);
 }
 
 static void display() {
@@ -679,7 +685,8 @@ static void keyboard(const unsigned char key, const int x, const int y) {
     << "s\t\tsave screenshot\n"
     << "f\t\tToggle flat shading on/off.\n"
     << "o\t\tToggle object\n"
-    << "e\t\tShow spheres\n" << endl;
+    << "e\t\tShow spheres\n"
+    << "r\t\tShow robots\n" << endl;
     break;
   case 's':
     glFlush();
@@ -692,8 +699,8 @@ static void keyboard(const unsigned char key, const int x, const int y) {
     toggleSelectedObject();
     break;
   case 'e':
-    toggleSpheres();
-    break;
+    toggleObjects();
+    break;  
   }
   glutPostRedisplay();
 }
