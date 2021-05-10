@@ -182,22 +182,42 @@ struct Geometry {
 
 
 // Vertex buffer and index buffer associated with the ground and cube geometry
-static std::shared_ptr<Geometry> g_ground, g_cube_1, g_cube_2, g_sphere_1, g_sphere_2;
+//static std::shared_ptr<Geometry> g_ground, g_cube_1, g_cube_2, g_sphere_1, g_sphere_2;
+static std::shared_ptr<Geometry> g_ground, g_head, g_torso, g_arm_l, g_arm_r, g_leg_l, g_leg_r;
+static std::shared_ptr<Geometry> g_eye_l, g_eye_r, g_mouth_1, g_mouth_2; 
+static std::shared_ptr<Geometry> g_arm_light_l, g_arm_light_r, g_leg_light_l, g_leg_light_r;
 
 // --------- Scene
 
 static const Cvec3 g_light1(2.0, 3.0, 14.0), g_light2(-2, -3.0, -5.0);  // define two lights positions in world space
-// static Matrix4 g_skyRbt = Matrix4::makeTranslation(Cvec3(0.0, 0.25, 4.0));
-static Matrix4 g_objectRbt[5] = {
-  Matrix4::makeTranslation(Cvec3(-1, 0, 0)), 
-  Matrix4::makeTranslation(Cvec3(1, 0, 0)),
-  Matrix4::makeTranslation(Cvec3(0.0, 0.25, 5.0)),
-  Matrix4::makeTranslation(Cvec3(-1, 0, -1)),
-  Matrix4::makeTranslation(Cvec3(1, 0, -1))
-  };  // array of objects[cube_1, cube_2, sky, sphere_1, sphere_2]
+// static Matrix4 g_skyRbt = Matrix4::makeTranslation(Cvec3(0.0, 0.5, 4.5));
+// static Matrix4 g_objectRbt[5] = {
+//   Matrix4::makeTranslation(Cvec3(-1, 0, 0)), 
+//   Matrix4::makeTranslation(Cvec3(1, 0, 0)),
+//   Matrix4::makeTranslation(Cvec3(0.0, 0.25, 5.0)),
+//   Matrix4::makeTranslation(Cvec3(-1, 0, -1)),
+//   Matrix4::makeTranslation(Cvec3(1, 0, -1))
+//   };  // array of objects[cube_1, cube_2, sky, sphere_1, sphere_2]
+static Matrix4 g_objectRbt[15] = {
+  Matrix4::makeTranslation(Cvec3(0, 0.5, 4.5)),     // sky
+  Matrix4::makeTranslation(Cvec3(0, 2, 0)),         // head
+  Matrix4::makeTranslation(Cvec3(0, 0.9, 0)),       // torso
+  Matrix4::makeTranslation(Cvec3(-0.6, 0.95, 0)),   // arm_l
+  Matrix4::makeTranslation(Cvec3(0.6, 0.95, 0)),    // arm_r
+  Matrix4::makeTranslation(Cvec3(-0.25, -0.5, 0)),  // leg_l
+  Matrix4::makeTranslation(Cvec3(0.25, -0.5, 0)),   // leg_r
+  Matrix4::makeTranslation(Cvec3(-0.3, 2.1, 0.23)), // eye_l
+  Matrix4::makeTranslation(Cvec3(0.3, 2.1, 0.23)),  // eye_r
+  Matrix4::makeTranslation(Cvec3(0, 1.95, 0.23)),   // mouth_1
+  Matrix4::makeTranslation(Cvec3(0, 1.8, 0.23)),    // mouth_2
+  Matrix4::makeTranslation(Cvec3(-0.6, 0.55, 0.05)),// arm_light_1
+  Matrix4::makeTranslation(Cvec3(0.6, 0.55, 0.05)), // arm_light_2
+  Matrix4::makeTranslation(Cvec3(-0.278, -0.45, 0.05)), // leg_light_1
+  Matrix4::makeTranslation(Cvec3(0.278, -0.45, 0.05))   // leg_light_2
+  };
 static Cvec3f g_objectColors[2] = {
-  Cvec3f(0.2, 0.2, 1.0),
-  Cvec3f(1.0, 0.16, 0.0)
+  Cvec3f(0.16, 0.16, 0.16),
+  Cvec3f(0.0, 1.0, 1.0)
   }; // colors for the objects
 
 ///////////////// END OF G L O B A L S //////////////////////////////////////////////////
@@ -217,6 +237,96 @@ static void initGround() {
   g_ground.reset(new Geometry(&vtx[0], &idx[0], 4, 6));
 }
 
+static void initRobot() {
+  int ibLen, vbLen;
+  getCubeVbIbLen(vbLen, ibLen);
+
+  // head
+  vector<VertexPN> vtx_head(vbLen);
+  vector<unsigned short> idx_head(ibLen);
+  makeCube(1, vtx_head.begin(), idx_head.begin());
+  g_objectRbt[1] *= Matrix4::makeScale(Cvec3(1, 0.8, 0.7));
+  g_head.reset(new Geometry(&vtx_head[0], &idx_head[0], vbLen, ibLen));
+
+  // torso
+  vector<VertexPN> vtx_torso(vbLen);
+  vector<unsigned short> idx_torso(ibLen);
+  makeCube(1, vtx_torso.begin(), idx_torso.begin());
+  g_objectRbt[2] *= Matrix4::makeScale(Cvec3(0.85, 1.5, 0.5));
+  g_torso.reset(new Geometry(&vtx_torso[0], &idx_torso[0], vbLen, ibLen));
+
+  // arm_l
+  vector<VertexPN> vtx_arm_l(vbLen);
+  vector<unsigned short> idx_arm_l(ibLen);
+  makeCube(1, vtx_arm_l.begin(), idx_arm_l.begin());
+  g_objectRbt[3] *= Matrix4::makeScale(Cvec3(0.25, 1.2, 0.25));
+  g_arm_l.reset(new Geometry(&vtx_arm_l[0], &idx_arm_l[0], vbLen, ibLen));
+
+  // arm_r
+  vector<VertexPN> vtx_arm_r(vbLen);
+  vector<unsigned short> idx_arm_r(ibLen);
+  makeCube(1, vtx_arm_r.begin(), idx_arm_r.begin());
+  g_objectRbt[4] *= Matrix4::makeScale(Cvec3(0.25, 1.2, 0.25));
+  g_arm_r.reset(new Geometry(&vtx_arm_r[0], &idx_arm_r[0], vbLen, ibLen));
+
+  // leg_l
+  vector<VertexPN> vtx_leg_l(vbLen);
+  vector<unsigned short> idx_leg_l(ibLen);
+  makeCube(1, vtx_leg_l.begin(), idx_leg_l.begin());
+  g_objectRbt[5] *= Matrix4::makeScale(Cvec3(0.25, 1.4, 0.25));
+  g_leg_l.reset(new Geometry(&vtx_leg_l[0], &idx_leg_l[0], vbLen, ibLen));
+
+  // leg_r
+  vector<VertexPN> vtx_leg_r(vbLen);
+  vector<unsigned short> idx_leg_r(ibLen);
+  makeCube(1, vtx_leg_r.begin(), idx_leg_r.begin());
+  g_objectRbt[6] *= Matrix4::makeScale(Cvec3(0.25, 1.4, 0.25));
+  g_leg_r.reset(new Geometry(&vtx_leg_r[0], &idx_leg_r[0], vbLen, ibLen));
+
+  // eye_l
+  vector<VertexPN> vtx(vbLen);
+  vector<unsigned short> idx(ibLen);
+  makeCube(1, vtx.begin(), idx.begin());
+  g_objectRbt[7] *= Matrix4::makeScale(Cvec3(0.15, 0.15, 0.25));
+  g_eye_l.reset(new Geometry(&vtx[0], &idx[0], vbLen, ibLen));
+
+  // eye_r
+  makeCube(1, vtx.begin(), idx.begin());
+  g_objectRbt[8] *= Matrix4::makeScale(Cvec3(0.15, 0.15, 0.25));
+  g_eye_r.reset(new Geometry(&vtx[0], &idx[0], vbLen, ibLen));
+
+  // mouth_1
+  makeCube(1, vtx.begin(), idx.begin());
+  g_objectRbt[9] *= Matrix4::makeScale(Cvec3(0.75, 0.18, 0.25));
+  g_mouth_1.reset(new Geometry(&vtx[0], &idx[0], vbLen, ibLen));
+
+  // mouth_2
+  makeCube(1, vtx.begin(), idx.begin());
+  g_objectRbt[10] *= Matrix4::makeScale(Cvec3(0.6, 0.12, 0.25));
+  g_mouth_2.reset(new Geometry(&vtx[0], &idx[0], vbLen, ibLen));
+
+  // arm_light_l
+  makeCube(1, vtx.begin(), idx.begin());
+  g_objectRbt[11] *= Matrix4::makeScale(Cvec3(0.1, 0.3, 0.2));
+  g_arm_light_l.reset(new Geometry(&vtx[0], &idx[0], vbLen, ibLen));
+
+  // arm_light_r
+  makeCube(1, vtx.begin(), idx.begin());
+  g_objectRbt[12] *= Matrix4::makeScale(Cvec3(0.1, 0.3, 0.2));
+  g_arm_light_r.reset(new Geometry(&vtx[0], &idx[0], vbLen, ibLen));
+
+  // leg_light_l
+  makeCube(1, vtx.begin(), idx.begin());
+  g_objectRbt[13] *= Matrix4::makeScale(Cvec3(0.19, 0.1, 0.2));
+  g_leg_light_l.reset(new Geometry(&vtx[0], &idx[0], vbLen, ibLen));
+
+  // leg_light_r
+  makeCube(1, vtx.begin(), idx.begin());
+  g_objectRbt[14] *= Matrix4::makeScale(Cvec3(0.19, 0.1, 0.2));
+  g_leg_light_r.reset(new Geometry(&vtx[0], &idx[0], vbLen, ibLen));
+}
+
+/*
 static void initCubes() {
   int ibLen, vbLen;
   getCubeVbIbLen(vbLen, ibLen);
@@ -257,6 +367,7 @@ static void initSpheres() {
   makeSphere(1, slices, stacks, vtx_sphere_2.begin(), idx_sphere_2.begin());
   g_sphere_2.reset(new Geometry(&vtx_sphere_2[0], &idx_sphere_2[0], vbLen, ibLen));
 }
+*/
 
 // takes a projection matrix and send to the the shaders
 static void sendProjectionMatrix(const ShaderState& curSS, const Matrix4& projMatrix) {
@@ -311,7 +422,7 @@ static void drawStuff() {
 
   // use the skyRbt as the eyeRbt
   // const Matrix4 eyeRbt = g_skyRbt;
-  const Matrix4 eyeRbt = g_objectRbt[2];
+  const Matrix4 eyeRbt = g_objectRbt[0];
   const Matrix4 invEyeRbt = inv(eyeRbt);
 
   const Cvec3 eyeLight1 = Cvec3(invEyeRbt * Cvec4(g_light1, 1)); // g_light1 position in eye coordinates
@@ -328,6 +439,7 @@ static void drawStuff() {
   safe_glUniform3f(curSS.h_uColor, 0.0, 0.8, 0.6); // set ground color
   g_ground->draw(curSS);
 
+  /*
   // draw objects
   if (!switchObject) {
     // cube 1
@@ -350,7 +462,7 @@ static void drawStuff() {
     NMVM = normalMatrix(MVM);
     sendModelViewNormalMatrix(curSS, MVM, NMVM);
     safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
-    g_sphere_2->draw(curSS);
+    g_sphere_1->draw(curSS);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     
     // sphere 2
@@ -362,6 +474,104 @@ static void drawStuff() {
     g_sphere_2->draw(curSS);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
+  */
+    // head
+    MVM = invEyeRbt * g_objectRbt[1];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
+    g_head->draw(curSS); 
+
+    // torso
+    MVM = invEyeRbt * g_objectRbt[2];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
+    g_torso->draw(curSS);
+
+    // arm_l
+    MVM = invEyeRbt * g_objectRbt[3];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
+    g_arm_l->draw(curSS); 
+
+    // arm_r
+    MVM = invEyeRbt * g_objectRbt[4];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
+    g_arm_r->draw(curSS);
+
+    // leg_l
+    MVM = invEyeRbt * g_objectRbt[5];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
+    g_leg_l->draw(curSS); 
+
+    // leg_r
+    MVM = invEyeRbt * g_objectRbt[6];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[0][0], g_objectColors[0][1], g_objectColors[0][2]);
+    g_leg_r->draw(curSS);
+
+    // eye_l
+    MVM = invEyeRbt * g_objectRbt[7];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+    g_eye_l->draw(curSS);
+
+    // eye_r
+    MVM = invEyeRbt * g_objectRbt[8];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+    g_eye_r->draw(curSS);
+
+    // mouth_1
+    MVM = invEyeRbt * g_objectRbt[9];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+    g_mouth_1->draw(curSS);
+
+    // mouth_2
+    MVM = invEyeRbt * g_objectRbt[10];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+    g_mouth_2->draw(curSS);
+
+    // arm_light_l
+    MVM = invEyeRbt * g_objectRbt[11];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+    g_arm_light_l->draw(curSS);
+
+    // arm_light_r
+    MVM = invEyeRbt * g_objectRbt[12];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+    g_arm_light_r->draw(curSS);
+
+    // leg_light_l
+    MVM = invEyeRbt * g_objectRbt[13];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+    g_leg_light_l->draw(curSS);
+
+    // leg_light_r
+    MVM = invEyeRbt * g_objectRbt[14];
+    NMVM = normalMatrix(MVM);
+    sendModelViewNormalMatrix(curSS, MVM, NMVM);
+    safe_glUniform3f(curSS.h_uColor, g_objectColors[1][0], g_objectColors[1][1], g_objectColors[1][2]);
+    g_leg_light_r->draw(curSS);
 }
 
 static void display() {
@@ -501,8 +711,9 @@ static void initShaders() {
 
 static void initGeometry() {
   initGround();
-  initCubes();
-  initSpheres();
+  //initCubes();
+  //initSpheres();
+  initRobot();
 }
 
 int main(int argc, char * argv[]) {
